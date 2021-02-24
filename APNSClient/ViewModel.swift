@@ -36,7 +36,7 @@ class ViewModel: ObservableObject {
         let alert = APNSwiftAlert(title: message.title, subtitle: message.subtitle, body: message.body)
         let apsSound = APNSSoundDictionary(isCritical: true, name: "cow.wav", volume: 0.8)
         let aps = APNSwiftPayload(alert: alert, badge: 0, sound: .critical(apsSound), hasContentAvailable: true)
-        let notification = AcmeNotification(acme2: message.data, aps: aps)
+        let notification = AcmeNotification(data: message.data, aps: aps)
         do {
             let expiry = Date().addingTimeInterval(5)
             guard let apns = apns else {
@@ -76,25 +76,14 @@ extension ViewModel {
             logger: logger
         )
     }
-    
-    static func configCertificateMethod() throws -> APNSwiftConfiguration {
-        return try APNSwiftConfiguration(
-            authenticationMethod: .tls(
-                privateKeyPath: "/Users/kylebrowning/Projects/swift/Fern/development_com.grasscove.Fern.pkey",
-                pemPath: "/Users/kylebrowning/Projects/swift/Fern/development_com.grasscove.Fern.pem"
-            ),
-            topic: "com.prospertin.Voyager",
-            environment: .sandbox
-        )
-    }
 }
 
 struct AcmeNotification: APNSwiftNotification {
-    let acme2: [String]
+    let data: [String]
     let aps: APNSwiftPayload
 
-    init(acme2: [String], aps: APNSwiftPayload) {
-        self.acme2 = acme2
+    init(data: [String], aps: APNSwiftPayload) {
+        self.data = data
         self.aps = aps
     }
 }
