@@ -19,6 +19,8 @@ class ViewModel: ObservableObject {
     @Published var result: String? = nil    
     @Published var message: Message = Message()
     @Published var token: String = ""
+    @Published var contentAvailable: Bool = false
+    @Published var mutableContent: Bool = true
     
     init() {
         do {
@@ -35,8 +37,8 @@ class ViewModel: ObservableObject {
         print("*** Model: \(token) Message: \(message)")
         let alert = APNSwiftAlert(title: message.title, subtitle: message.subtitle, body: message.body)
         let apsSound = APNSSoundDictionary(isCritical: true, name: "cow.wav", volume: 0.8)
-        let aps = APNSwiftPayload(alert: alert, badge: 0, sound: .critical(apsSound), hasContentAvailable: true)
-        let notification = AcmeNotification(data: message.data, aps: aps)
+        let aps = APNSwiftPayload(alert: alert, badge: 0, sound: .critical(apsSound), hasContentAvailable: contentAvailable, hasMutableContent: mutableContent)
+        let notification = AcmeNotification(data: [message.data], aps: aps)
         do {
             let expiry = Date().addingTimeInterval(5)
             guard let apns = apns else {
@@ -45,7 +47,7 @@ class ViewModel: ObservableObject {
             }
             try apns.send(
                 notification,
-                pushType: .alert,
+                pushType: contentAvailable ?  .background : .alert,
                 to: token,
                 expiration: expiry,
                 priority: 10
@@ -92,9 +94,9 @@ struct Message {
     var title: String
     var subtitle: String?
     var body: String
-    var data: [String] // Could be object
+    var data: String // Could be object
     
-    init(title: String = "", subtitle: String? = nil, body: String = "", data: [String] = []) {
+    init(title: String = "", subtitle: String? = nil, body: String = "", data: String = "") {
         self.title = title
         self.subtitle = subtitle
         self.body = body

@@ -37,9 +37,22 @@ struct ContentView: View {
             
             HStack(alignment: .top) {
                 Text("Data:")
-                TextEditor(text: $viewModel.message.body)
+                if #available(OSX 11.0, *) {
+                    TextEditor(text: $viewModel.message.data)
+                } else {
+                    TextField("Message data", text: $viewModel.message.data)
+                }
             }
             .padding()
+            
+            HStack {
+                Toggle(isOn: $viewModel.contentAvailable) {
+                    Text("Content Available")
+                }.toggleStyle(CheckboxToggleStyle())
+                Toggle(isOn: $viewModel.mutableContent) {
+                    Text("Mutable content")
+                }.toggleStyle(CheckboxToggleStyle())
+            }
             
             Button("Send") {
                 viewModel.sendNotification()
